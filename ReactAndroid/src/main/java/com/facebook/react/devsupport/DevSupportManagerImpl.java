@@ -57,6 +57,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import android.os.Build;
+
 /**
  * Interface for accessing and interacting with development features. Following features
  * are supported through this manager class:
@@ -120,6 +122,8 @@ public class DevSupportManagerImpl implements DevSupportManager, PackagerCommand
   private @Nullable StackFrame[] mLastErrorStack;
   private int mLastErrorCookie = 0;
   private @Nullable ErrorType mLastErrorType;
+
+  private int mAlertPermission = Build.VERSION.SDK_INT >= 26 ? 2038 : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 
   private static class JscProfileTask extends AsyncTask<String, Void, Void> {
     private static final MediaType JSON =
@@ -310,7 +314,7 @@ public class DevSupportManagerImpl implements DevSupportManager, PackagerCommand
           public void run() {
             if (mRedBoxDialog == null) {
               mRedBoxDialog = new RedBoxDialog(mApplicationContext, DevSupportManagerImpl.this, mRedBoxHandler);
-              mRedBoxDialog.getWindow().setType(2038);
+              mRedBoxDialog.getWindow().setType(mAlertPermission);
             }
             if (mRedBoxDialog.isShowing()) {
               // Sometimes errors cause multiple errors to be thrown in JS in quick succession. Only
@@ -466,7 +470,7 @@ public class DevSupportManagerImpl implements DevSupportManager, PackagerCommand
               }
             })
             .create();
-    mDevOptionsDialog.getWindow().setType(2038);
+    mDevOptionsDialog.getWindow().setType(mAlertPermission);
     mDevOptionsDialog.show();
   }
 
@@ -640,7 +644,7 @@ public class DevSupportManagerImpl implements DevSupportManager, PackagerCommand
       .setMessage(mApplicationContext.getString(
           mDevSettings.isRemoteJSDebugEnabled() ? R.string.catalyst_remotedbg_message : R.string.catalyst_jsload_message))
       .create();
-    dialog.getWindow().setType(2038);
+    dialog.getWindow().setType(mAlertPermission);
     dialog.show();
 
     if (mDevSettings.isRemoteJSDebugEnabled()) {
